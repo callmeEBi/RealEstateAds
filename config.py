@@ -10,5 +10,5 @@ class Config:
     SQLALCHEMY_DATABASE_URI = "sqlite:///app.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     UPLOAD_FOLDER = os.path.join(basedir, "uploads")
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max upload
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
     ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}

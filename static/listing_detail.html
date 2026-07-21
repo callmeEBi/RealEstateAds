@@ -1,85 +1,100 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Listing Details - RealEstate</title>
-    <link rel="stylesheet" href="/static/css/style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="/static/css/style.css" />
+  </head>
+  <body>
     <nav class="navbar">
-        <div class="container">
-            <a href="/" class="brand">🏠 RealEstate</a>
-            <div class="nav-links">
-                <a href="/">Home</a>
-                <span id="auth-links">
-                    <a href="/login">Login</a>
-                    <a href="/register">Register</a>
-                </span>
-                <span id="user-links" style="display:none;">
-                    <a href="/dashboard">Dashboard</a>
-                    <a href="#" id="logout-link">Logout</a>
-                </span>
-            </div>
+      <div class="container">
+        <a href="/" class="brand">🏠 RealEstate</a>
+        <div class="nav-links">
+          <a href="/">Home</a>
+          <span id="auth-links">
+            <a href="/login">Login</a>
+            <a href="/register">Register</a>
+          </span>
+          <span id="user-links" style="display: none">
+            <a href="/dashboard">Dashboard</a>
+            <a href="#" id="logout-link">Logout</a>
+          </span>
         </div>
+      </div>
     </nav>
 
     <div class="container detail-container">
-        <div id="listing-detail">
-            <p>Loading...</p>
-        </div>
+      <div id="listing-detail">
+        <p>Loading...</p>
+      </div>
     </div>
 
     <script src="/static/js/app.js"></script>
     <script>
-        const pathParts = window.location.pathname.split('/');
-        const listingId = pathParts[pathParts.length - 1];
+      const pathParts = window.location.pathname.split("/");
+      const listingId = pathParts[pathParts.length - 1];
 
-        function updateAuthUI() {
-            fetch('/api/user')
-                .then(res => res.json())
-                .then(user => {
-                    if (user.id) {
-                        document.getElementById('auth-links').style.display = 'none';
-                        document.getElementById('user-links').style.display = 'inline';
-                        if (user.role === 'admin') {
-                            document.querySelector('#user-links a:first-child').textContent = 'Admin Panel';
-                            document.querySelector('#user-links a:first-child').href = '/admin';
-                        } else {
-                            document.querySelector('#user-links a:first-child').textContent = 'Dashboard';
-                            document.querySelector('#user-links a:first-child').href = '/dashboard';
-                        }
-                    } else {
-                        document.getElementById('auth-links').style.display = 'inline';
-                        document.getElementById('user-links').style.display = 'none';
-                    }
-                })
-                .catch(() => {});
-        }
-
-        window.onload = async function() {
-            updateAuthUI();
-            document.getElementById('logout-link').addEventListener('click', async function(e) {
-                e.preventDefault();
-                await apiFetch('/api/logout', { method: 'POST' });
-                window.location.href = '/';
-            });
-
-            try {
-                const data = await apiFetch(`/api/listings/${listingId}`);
-                renderListing(data);
-            } catch (err) {
-                document.getElementById('listing-detail').innerHTML = `<p class="error">Error loading listing: ${err.message}</p>`;
+      function updateAuthUI() {
+        fetch("/api/user")
+          .then((res) => res.json())
+          .then((user) => {
+            if (user.id) {
+              document.getElementById("auth-links").style.display = "none";
+              document.getElementById("user-links").style.display = "inline";
+              if (user.role === "admin") {
+                document.querySelector(
+                  "#user-links a:first-child",
+                ).textContent = "Admin Panel";
+                document.querySelector("#user-links a:first-child").href =
+                  "/admin";
+              } else {
+                document.querySelector(
+                  "#user-links a:first-child",
+                ).textContent = "Dashboard";
+                document.querySelector("#user-links a:first-child").href =
+                  "/dashboard";
+              }
+            } else {
+              document.getElementById("auth-links").style.display = "inline";
+              document.getElementById("user-links").style.display = "none";
             }
-        };
+          })
+          .catch(() => {});
+      }
 
-        function renderListing(listing) {
-            const container = document.getElementById('listing-detail');
-            const imagesHtml = listing.images && listing.images.length > 0
-                ? listing.images.map(img => `<img src="/uploads/${img.filename}" alt="Property image" class="detail-image">`).join('')
-                : '<p>No images available.</p>';
+      window.onload = async function () {
+        updateAuthUI();
+        document
+          .getElementById("logout-link")
+          .addEventListener("click", async function (e) {
+            e.preventDefault();
+            await apiFetch("/api/logout", { method: "POST" });
+            window.location.href = "/";
+          });
 
-            container.innerHTML = `
+        try {
+          const data = await apiFetch(`/api/listings/${listingId}`);
+          renderListing(data);
+        } catch (err) {
+          document.getElementById("listing-detail").innerHTML =
+            `<p class="error">Error loading listing: ${err.message}</p>`;
+        }
+      };
+
+      function renderListing(listing) {
+        const container = document.getElementById("listing-detail");
+        const imagesHtml =
+          listing.images && listing.images.length > 0
+            ? listing.images
+                .map(
+                  (img) =>
+                    `<img src="/uploads/${img.filename}" alt="Property image" class="detail-image">`,
+                )
+                .join("")
+            : "<p>No images available.</p>";
+
+        container.innerHTML = `
                 <div class="detail-card">
                     <h1>${listing.title}</h1>
                     <div class="detail-price">$${listing.price.toLocaleString()}</div>
@@ -88,22 +103,22 @@
                         <span>${listing.property_type}</span>
                         <span>${listing.bedrooms || 0} beds</span>
                         <span>${listing.bathrooms || 0} baths</span>
-                        <span>${listing.area || 'N/A'} sq ft</span>
+                        <span>${listing.area || "N/A"} sq ft</span>
                     </div>
                     <div class="detail-description">${listing.description}</div>
                     <div class="detail-images">${imagesHtml}</div>
                     <div class="detail-seller">
                         <h3>Contact Seller</h3>
                         <p><strong>Name:</strong> ${listing.seller.name}</p>
-                        ${listing.seller.phone ? `<p><strong>Phone:</strong> ${listing.seller.phone}</p>` : ''}
-                        ${listing.contact_phone ? `<p><strong>Contact Phone:</strong> ${listing.contact_phone}</p>` : ''}
-                        ${listing.contact_social ? `<p><strong>Social:</strong> ${listing.contact_social}</p>` : ''}
+                        ${listing.seller.phone ? `<p><strong>Phone:</strong> ${listing.seller.phone}</p>` : ""}
+                        ${listing.contact_phone ? `<p><strong>Contact Phone:</strong> ${listing.contact_phone}</p>` : ""}
+                        ${listing.contact_social ? `<p><strong>Social:</strong> ${listing.contact_social}</p>` : ""}
                         <p><strong>Email:</strong> ${listing.seller.email}</p>
                     </div>
                     <a href="/" class="btn-primary" style="display:inline-block;margin-top:20px;">← Back to listings</a>
                 </div>
             `;
-        }
+      }
     </script>
-</body>
+  </body>
 </html>

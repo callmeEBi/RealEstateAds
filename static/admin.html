@@ -1,50 +1,55 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Panel - RealEstate</title>
-    <link rel="stylesheet" href="/static/css/style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="/static/css/style.css" />
+  </head>
+  <body>
     <nav class="navbar">
-        <div class="container">
-            <a href="/" class="brand">🏠 RealEstate</a>
-            <div class="nav-links">
-                <a href="/">Home</a>
-                <a href="/dashboard">Dashboard</a>
-                <a href="#" id="logout-link">Logout</a>
-            </div>
+      <div class="container">
+        <a href="/" class="brand">🏠 RealEstate</a>
+        <div class="nav-links">
+          <a href="/">Home</a>
+          <a href="/dashboard">Dashboard</a>
+          <a href="#" id="logout-link">Logout</a>
         </div>
+      </div>
     </nav>
 
     <div class="container">
-        <h2>Admin Panel – Pending Listings</h2>
-        <div id="pending-listings">
-            <p>Loading...</p>
-        </div>
+      <h2>Admin Panel – Pending Listings</h2>
+      <div id="pending-listings">
+        <p>Loading...</p>
+      </div>
     </div>
 
     <script src="/static/js/app.js"></script>
     <script src="/static/js/api.js"></script>
     <script>
-        window.onload = function() {
-            loadPendingListings();
-            document.getElementById('logout-link').addEventListener('click', handleLogout);
-        };
+      window.onload = function () {
+        loadPendingListings();
+        document
+          .getElementById("logout-link")
+          .addEventListener("click", handleLogout);
+      };
 
-        async function loadPendingListings() {
-            const container = document.getElementById('pending-listings');
-            try {
-                const data = await apiFetch('/api/admin/listings');
-                if (data.length === 0) {
-                    container.innerHTML = '<p>No pending listings to review.</p>';
-                    return;
-                }
-                container.innerHTML = data.map(listing => `
+      async function loadPendingListings() {
+        const container = document.getElementById("pending-listings");
+        try {
+          const data = await apiFetch("/api/admin/listings");
+          if (data.length === 0) {
+            container.innerHTML = "<p>No pending listings to review.</p>";
+            return;
+          }
+          container.innerHTML = data
+            .map(
+              (listing) => `
                     <div class="admin-listing-card">
                         <div class="admin-listing-image">
-                            ${listing.images.length > 0
+                            ${
+                              listing.images.length > 0
                                 ? `<img src="/uploads/${listing.images[0].filename}" alt="${listing.title}" style="max-width:150px;">`
                                 : `<div class="no-image">No image</div>`
                             }
@@ -61,33 +66,39 @@
                             <button class="btn-reject" data-id="${listing.id}">Reject</button>
                         </div>
                     </div>
-                `).join('');
+                `,
+            )
+            .join("");
 
-                // Attach events
-                document.querySelectorAll('.btn-approve').forEach(btn => {
-                    btn.addEventListener('click', async function() {
-                        const id = this.dataset.id;
-                        await apiFetch(`/api/admin/listings/${id}/approve`, { method: 'POST' });
-                        loadPendingListings();
-                    });
-                });
-                document.querySelectorAll('.btn-reject').forEach(btn => {
-                    btn.addEventListener('click', async function() {
-                        const id = this.dataset.id;
-                        await apiFetch(`/api/admin/listings/${id}/reject`, { method: 'POST' });
-                        loadPendingListings();
-                    });
-                });
-            } catch (err) {
-                container.innerHTML = `<p class="error">Error: ${err.message}</p>`;
-            }
+          // Attach events
+          document.querySelectorAll(".btn-approve").forEach((btn) => {
+            btn.addEventListener("click", async function () {
+              const id = this.dataset.id;
+              await apiFetch(`/api/admin/listings/${id}/approve`, {
+                method: "POST",
+              });
+              loadPendingListings();
+            });
+          });
+          document.querySelectorAll(".btn-reject").forEach((btn) => {
+            btn.addEventListener("click", async function () {
+              const id = this.dataset.id;
+              await apiFetch(`/api/admin/listings/${id}/reject`, {
+                method: "POST",
+              });
+              loadPendingListings();
+            });
+          });
+        } catch (err) {
+          container.innerHTML = `<p class="error">Error: ${err.message}</p>`;
         }
+      }
 
-        async function handleLogout(e) {
-            e.preventDefault();
-            await apiFetch('/api/logout', { method: 'POST' });
-            window.location.href = '/';
-        }
+      async function handleLogout(e) {
+        e.preventDefault();
+        await apiFetch("/api/logout", { method: "POST" });
+        window.location.href = "/";
+      }
     </script>
-</body>
+  </body>
 </html>
