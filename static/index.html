@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RealEstate - Find Your Dream Home</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="brand">🏠 RealEstate</a>
+            <div class="nav-links">
+                <a href="/" id="nav-home">Home</a>
+                <span id="auth-links">
+                    <a href="/login" id="nav-login">Login</a>
+                    <a href="/register" id="nav-register">Register</a>
+                </span>
+                <span id="user-links" style="display:none;">
+                    <a href="/dashboard" id="nav-dashboard">Dashboard</a>
+                    <a href="#" id="nav-logout">Logout</a>
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero / Search -->
+    <section class="hero">
+        <div class="container">
+            <h1>Find Your Perfect Property</h1>
+            <p>Browse listings, connect with sellers, and make your move.</p>
+            <div class="search-bar">
+                <input type="text" id="search-location" placeholder="Location (city)">
+                <input type="number" id="search-min-price" placeholder="Min price">
+                <input type="number" id="search-max-price" placeholder="Max price">
+                <select id="search-type">
+                    <option value="">All Types</option>
+                    <option value="Apartment">Apartment</option>
+                    <option value="Villa">Villa</option>
+                    <option value="Land">Land</option>
+                    <option value="Townhouse">Townhouse</option>
+                </select>
+                <button id="search-btn">Search</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Listings Grid -->
+    <section class="listings-section">
+        <div class="container">
+            <h2>Available Properties</h2>
+            <div id="listings-grid" class="listings-grid">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts -->
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script>
+        window.onload = function() {
+            updateAuthUI();
+            loadListings();
+            document.getElementById('search-btn').addEventListener('click', loadListings);
+            document.getElementById('nav-logout').addEventListener('click', handleLogout);
+        };
+
+        async function loadListings() {
+            const location = document.getElementById('search-location').value.trim();
+            const minPrice = document.getElementById('search-min-price').value;
+            const maxPrice = document.getElementById('search-max-price').value;
+            const type = document.getElementById('search-type').value;
+
+            let url = '/api/listings?';
+            if (location) url += `location=${encodeURIComponent(location)}&`;
+            if (minPrice) url += `min_price=${minPrice}&`;
+            if (maxPrice) url += `max_price=${maxPrice}&`;
+            if (type) url += `property_type=${encodeURIComponent(type)}&`;
+
+            const data = await apiFetch(url);
+            const grid = document.getElementById('listings-grid');
+            if (data.length === 0) {
+                grid.innerHTML = '<p class="no-listings">No listings found. Try adjusting your filters.</p>';
+                return;
+            }
+            grid.innerHTML = data.map(listing => `
+                <div class="listing-card" data-id="${listing.id}">
+                    <div class="listing-image">
+                        ${listing.images.length > 0
+                            ? `<img src="/uploads/${listing.images[0].filename}" alt="${listing.title}">`
+                            : `<div class="no-image">No image</div>`
+                        }
+                    </div>
+                    <div class="listing-info">
+                        <h3>${listing.title}</h3>
+                        <p class="price">$${listing.price.toLocaleString()}</p>
+                        <p class="location">${listing.location}</p>
+                        <p class="type">${listing.property_type} · ${listing.bedrooms || '?'} beds</p>
+                        <a href="/listing/${listing.id}" class="btn-view">View Details</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function handleLogout(e) {
+            e.preventDefault();
+            await apiFetch('/api/logout', { method: 'POST' });
+            updateAuthUI();
+            window.location.href = '/';
+        }
+
+        function updateAuthUI() {
+            fetch('/api/user')
+                .then(res => res.json())
+                .then(user => {
+                    if (user.id) {
+                        document.getElementById('auth-links').style.display = 'none';
+                        document.getElementById('user-links').style.display = 'inline';
+                        const navDashboard = document.getElementById('nav-dashboard');
+                        if (user.role === 'admin') {
+                            navDashboard.textContent = 'Admin Panel';
+                            navDashboard.href = '/admin';
+                        } else {
+                            navDashboard.textContent = 'Dashboard';
+                            navDashboard.href = '/dashboard';
+                        }
+                    } else {
+                        document.getElementById('auth-links').style.display = 'inline';
+                        document.getElementById('user-links').style.display = 'none';
+                    }
+                })
+                .catch(() => {});
+        }
+    </script>
+</body>
+</html>

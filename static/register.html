@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - RealEstate</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="brand">🏠 RealEstate</a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/login">Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="form-container">
+        <h2>Create Account</h2>
+        <form id="register-form">
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone (optional)</label>
+                <input type="text" id="phone">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required minlength="6">
+            </div>
+            <div id="register-error" class="error-message"></div>
+            <button type="submit" class="btn-primary">Register</button>
+            <p class="form-footer">Already have an account? <a href="/login">Log In</a></p>
+        </form>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+        document.getElementById('register-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                await apiFetch('/api/register', {
+                    method: 'POST',
+                    body: JSON.stringify({ name, email, phone, password })
+                });
+                // After registration, redirect to login
+                window.location.href = '/login?registered=true';
+            } catch (err) {
+                document.getElementById('register-error').textContent = err.message || 'Registration failed.';
+            }
+        });
+    </script>
+</body>
+</html>

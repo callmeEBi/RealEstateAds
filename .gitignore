@@ -1,0 +1,29 @@
+# Python virtual environment
+venv/
+env/
+ENV/
+
+# Database
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploaded images
+uploads/
+
+# Environment variables
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE folders
+.vscode/
+.idea/
+
+# OS junk
+.DS_Store
+Thumbs.db
