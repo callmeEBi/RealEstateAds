@@ -27,3 +27,6 @@ __pycache__/
 # OS junk
 .DS_Store
 Thumbs.db
+
+# Dump Files
+project_dump*
