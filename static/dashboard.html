@@ -1,84 +1,107 @@
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Listings - RealEstate</title>
     <link rel="stylesheet" href="/static/css/style.css" />
-  </head>
-  <body>
+</head>
+<body>
     <nav class="navbar">
-      <div class="container">
-        <a href="/" class="brand">🏠 RealEstate</a>
-        <div class="nav-links">
-          <a href="/">Home</a>
-          <a href="/create" id="create-link">Create Listing</a>
-          <a href="#" id="logout-link">Logout</a>
+        <div class="container nav-container">
+            <a href="/" class="brand">🏠seyed RealEstate</a>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="nav-links" id="navLinks">
+                <a href="/">Home</a>
+                <a href="/create" id="create-link">Create Listing</a>
+                <a href="#" id="logout-link">Logout</a>
+            </div>
         </div>
-      </div>
     </nav>
 
     <div class="container">
-      <h2>My Listings</h2>
-      <div id="my-listings-container">
-        <p>Loading...</p>
-      </div>
+        <div class="admin-panel-container">
+            <h2>📋 My Listings</h2>
+            <div id="my-listings-container">
+                <p class="no-pending">Loading...</p>
+            </div>
+        </div>
     </div>
 
     <script src="/static/js/app.js"></script>
     <script src="/static/js/api.js"></script>
     <script>
-      window.onload = function () {
-        loadMyListings();
-        document
-          .getElementById("logout-link")
-          .addEventListener("click", handleLogout);
-      };
-
-      async function loadMyListings() {
-        const container = document.getElementById("my-listings-container");
-        const data = await apiFetch("/api/my-listings");
-        if (data.length === 0) {
-          container.innerHTML =
-            '<p>You have not created any listings yet. <a href="/create">Create one now</a>.</p>';
-          return;
+        // ---- Nav toggle ----
+        const toggle = document.getElementById('navToggle');
+        const links = document.getElementById('navLinks');
+        if (toggle && links) {
+            toggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                links.classList.toggle('open');
+                toggle.classList.toggle('active');
+            });
+            document.addEventListener('click', function(e) {
+                if (!links.contains(e.target) && !toggle.contains(e.target)) {
+                    links.classList.remove('open');
+                    toggle.classList.remove('active');
+                }
+            });
         }
-        container.innerHTML = data
-          .map(
-            (listing) => `
-                <div class="listing-item">
-                    <div class="item-info">
-                        <strong>${listing.title}</strong>
-                        <span class="price">$${listing.price.toLocaleString()}</span>
-                        <span class="location">${listing.location}</span>
-                        <span class="status status-${listing.status}">${listing.status}</span>
-                        <span class="images-count">📷 ${listing.image_count}</span>
-                    </div>
-                    <div class="item-actions">
-                        <a href="/edit/${listing.id}" class="btn-edit">Edit</a>
-                        <button class="btn-delete" data-id="${listing.id}">Delete</button>
-                    </div>
-                </div>
-            `,
-          )
-          .join("");
 
-        document.querySelectorAll(".btn-delete").forEach((btn) => {
-          btn.addEventListener("click", async function () {
-            const id = this.dataset.id;
-            if (confirm("Are you sure you want to delete this listing?")) {
-              await apiFetch(`/api/listings/${id}`, { method: "DELETE" });
-              loadMyListings();
+        // ---- Load listings ----
+        window.onload = function () {
+            loadMyListings();
+            document.getElementById('logout-link').addEventListener('click', handleLogout);
+        };
+
+        async function loadMyListings() {
+            const container = document.getElementById('my-listings-container');
+            try {
+                const data = await apiFetch('/api/my-listings');
+                if (data.length === 0) {
+                    container.innerHTML = '<p class="no-pending">You have not created any listings yet. <a href="/create">Create one now</a>.</p>';
+                    return;
+                }
+                container.innerHTML = data.map(listing => `
+                    <div class="admin-listing-card">
+                        <div class="admin-listing-info">
+                            <h3>${listing.title}</h3>
+                            <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-top: 4px;">
+                                <span class="price">$${listing.price.toLocaleString()}</span>
+                                <span class="location">📍 ${listing.location}</span>
+                                <span class="status status-${listing.status}">${listing.status}</span>
+                                <span class="images-count">📷 ${listing.image_count} images</span>
+                            </div>
+                        </div>
+                        <div class="admin-listing-actions">
+                            <a href="/edit/${listing.id}" class="btn-edit">Edit</a>
+                            <button class="btn-delete" data-id="${listing.id}">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.querySelectorAll('.btn-delete').forEach(btn => {
+                    btn.addEventListener('click', async function () {
+                        const id = this.dataset.id;
+                        if (confirm('Are you sure you want to delete this listing?')) {
+                            await apiFetch(`/api/listings/${id}`, { method: 'DELETE' });
+                            loadMyListings();
+                        }
+                    });
+                });
+            } catch (err) {
+                container.innerHTML = `<p class="error" style="color:#dc2626;">⚠️ Error: ${err.message}</p>`;
             }
-          });
-        });
-      }
+        }
 
-      async function handleLogout(e) {
-        e.preventDefault();
-        await apiFetch("/api/logout", { method: "POST" });
-        window.location.href = "/";
-      }
+        // ---- Logout ----
+        async function handleLogout(e) {
+            e.preventDefault();
+            await apiFetch('/api/logout', { method: 'POST' });
+            window.location.href = '/';
+        }
     </script>
-  </body>
+</body>
 </html>

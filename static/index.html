@@ -1,148 +1,190 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RealEstate - Find Your Dream Home</title>
+    <title>seyed RealEstate · Find Your Dream Home</title>
     <link rel="stylesheet" href="/static/css/style.css" />
-  </head>
-  <body>
+</head>
+<body>
+
+    <!-- ========== NAVBAR ========== -->
     <nav class="navbar">
-      <div class="container">
-        <a href="/" class="brand">🏠 RealEstate</a>
-        <div class="nav-links">
-          <a href="/" id="nav-home">Home</a>
-          <span id="auth-links">
-            <a href="/login" id="nav-login">Login</a>
-            <a href="/register" id="nav-register">Register</a>
-          </span>
-          <span id="user-links" style="display: none">
-            <a href="/dashboard" id="nav-dashboard">Dashboard</a>
-            <a href="#" id="nav-logout">Logout</a>
-          </span>
+        <div class="container nav-container">
+            <a href="/" class="brand">🏠seyed RealEstate</a>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="nav-links" id="navLinks">
+                <a href="/" id="nav-home">Home</a>
+                <span id="auth-links">
+                    <a href="/login" id="nav-login">Login</a>
+                    <a href="/register" id="nav-register">Register</a>
+                </span>
+                <span id="user-links" style="display:none">
+                    <a href="/dashboard" id="nav-dashboard">Dashboard</a>
+                    <a href="#" id="nav-logout">Logout</a>
+                </span>
+            </div>
         </div>
-      </div>
     </nav>
 
+    <!-- ========== HERO ========== -->
     <section class="hero">
-      <div class="container">
-        <h1>Find Your Perfect Property</h1>
-        <p>Browse listings, connect with sellers, and make your move.</p>
-        <div class="search-bar">
-          <input
-            type="text"
-            id="search-location"
-            placeholder="Location (city)"
-          />
-          <input type="number" id="search-min-price" placeholder="Min price" />
-          <input type="number" id="search-max-price" placeholder="Max price" />
-          <select id="search-type">
-            <option value="">All Types</option>
-            <option value="Apartment">Apartment</option>
-            <option value="Villa">Villa</option>
-            <option value="Land">Land</option>
-            <option value="Townhouse">Townhouse</option>
-          </select>
-          <button id="search-btn">Search</button>
+        <div class="container">
+            <h1>Find Your Perfect Property</h1>
+            <p>Browse listings, connect with sellers, and make your move.</p>
+            <div class="search-bar">
+                <input type="text" id="search-location" placeholder="Location (city)" />
+                <input type="number" id="search-min-price" placeholder="Min price" min="0" step="1" />
+                <input type="number" id="search-max-price" placeholder="Max price" min="0" step="1" />
+                <select id="search-type">
+                    <option value="">All Types</option>
+                    <option value="Apartment">Apartment</option>
+                    <option value="Villa">Villa</option>
+                    <option value="Land">Land</option>
+                    <option value="Townhouse">Townhouse</option>
+                </select>
+                <button id="search-btn">Search</button>
+            </div>
         </div>
-      </div>
     </section>
 
+    <!-- ========== LISTINGS ========== -->
     <section class="listings-section">
-      <div class="container">
-        <h2>Available Properties</h2>
-        <div id="listings-grid" class="listings-grid"></div>
-      </div>
+        <div class="container">
+            <div class="section-header">
+                <h2>Available Properties</h2>
+                <span class="section-badge" id="result-count"></span>
+            </div>
+            <div id="listings-grid" class="listings-grid"></div>
+        </div>
     </section>
 
+    <!-- ========== SCRIPTS ========== -->
     <script src="/static/js/app.js"></script>
     <script src="/static/js/api.js"></script>
     <script>
-      window.onload = function () {
-        updateAuthUI();
-        loadListings();
-        document
-          .getElementById("search-btn")
-          .addEventListener("click", loadListings);
-        document
-          .getElementById("nav-logout")
-          .addEventListener("click", handleLogout);
-      };
-
-      async function loadListings() {
-        const location = document
-          .getElementById("search-location")
-          .value.trim();
-        const minPrice = document.getElementById("search-min-price").value;
-        const maxPrice = document.getElementById("search-max-price").value;
-        const type = document.getElementById("search-type").value;
-
-        let url = "/api/listings?";
-        if (location) url += `location=${encodeURIComponent(location)}&`;
-        if (minPrice) url += `min_price=${minPrice}&`;
-        if (maxPrice) url += `max_price=${maxPrice}&`;
-        if (type) url += `property_type=${encodeURIComponent(type)}&`;
-
-        const data = await apiFetch(url);
-        const grid = document.getElementById("listings-grid");
-        if (data.length === 0) {
-          grid.innerHTML =
-            '<p class="no-listings">No listings found. Try adjusting your filters.</p>';
-          return;
+        // ---- Nav toggle ----
+        const toggle = document.getElementById('navToggle');
+        const links = document.getElementById('navLinks');
+        if (toggle && links) {
+            toggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                links.classList.toggle('open');
+                toggle.classList.toggle('active');
+            });
+            document.addEventListener('click', function(e) {
+                if (!links.contains(e.target) && !toggle.contains(e.target)) {
+                    links.classList.remove('open');
+                    toggle.classList.remove('active');
+                }
+            });
         }
-        grid.innerHTML = data
-          .map(
-            (listing) => `
-                <div class="listing-card" data-id="${listing.id}">
-                    <div class="listing-image">
-                        ${
-                          listing.images.length > 0
-                            ? `<img src="/uploads/${listing.images[0].filename}" alt="${listing.title}">`
-                            : `<div class="no-image">No image</div>`
+
+        // ---- Auth ----
+        function updateAuthUI() {
+            fetch('/api/user')
+                .then(r => r.json())
+                .then(user => {
+                    const authLinks = document.getElementById('auth-links');
+                    const userLinks = document.getElementById('user-links');
+                    if (user && user.id) {
+                        // ✅ FIX: use inline-flex so gap works
+                        if (authLinks) authLinks.style.display = 'none';
+                        if (userLinks) userLinks.style.display = 'inline-flex';
+                        const dash = document.getElementById('nav-dashboard');
+                        if (dash) {
+                            if (user.role === 'admin') {
+                                dash.textContent = 'Admin Panel';
+                                dash.href = '/admin';
+                            } else {
+                                dash.textContent = 'Dashboard';
+                                dash.href = '/dashboard';
+                            }
                         }
-                    </div>
-                    <div class="listing-info">
-                        <h3>${listing.title}</h3>
-                        <p class="price">$${listing.price.toLocaleString()}</p>
-                        <p class="location">${listing.location}</p>
-                        <p class="type">${listing.property_type} · ${listing.bedrooms || "?"} beds</p>
-                        <a href="/listing/${listing.id}" class="btn-view">View Details</a>
-                    </div>
-                </div>
-            `,
-          )
-          .join("");
-      }
+                    } else {
+                        // ✅ FIX: use inline-flex so gap works
+                        if (authLinks) authLinks.style.display = 'inline-flex';
+                        if (userLinks) userLinks.style.display = 'none';
+                    }
+                })
+                .catch(() => {});
+        }
 
-      async function handleLogout(e) {
-        e.preventDefault();
-        await apiFetch("/api/logout", { method: "POST" });
-        updateAuthUI();
-        window.location.href = "/";
-      }
+        // ---- Load listings with negative price protection ----
+        async function loadListings() {
+            const location = document.getElementById('search-location').value.trim();
+            let minPrice = document.getElementById('search-min-price').value;
+            let maxPrice = document.getElementById('search-max-price').value;
+            const type = document.getElementById('search-type').value;
 
-      function updateAuthUI() {
-        fetch("/api/user")
-          .then((res) => res.json())
-          .then((user) => {
-            if (user.id) {
-              document.getElementById("auth-links").style.display = "none";
-              document.getElementById("user-links").style.display = "inline";
-              const navDashboard = document.getElementById("nav-dashboard");
-              if (user.role === "admin") {
-                navDashboard.textContent = "Admin Panel";
-                navDashboard.href = "/admin";
-              } else {
-                navDashboard.textContent = "Dashboard";
-                navDashboard.href = "/dashboard";
-              }
-            } else {
-              document.getElementById("auth-links").style.display = "inline";
-              document.getElementById("user-links").style.display = "none";
+            // Prevent negative prices
+            if (minPrice !== '') {
+                const num = parseFloat(minPrice);
+                if (isNaN(num) || num < 0) minPrice = '';
+                else minPrice = num;
             }
-          })
-          .catch(() => {});
-      }
+            if (maxPrice !== '') {
+                const num = parseFloat(maxPrice);
+                if (isNaN(num) || num < 0) maxPrice = '';
+                else maxPrice = num;
+            }
+
+            let url = '/api/listings?';
+            if (location) url += 'location=' + encodeURIComponent(location) + '&';
+            if (minPrice !== '') url += 'min_price=' + minPrice + '&';
+            if (maxPrice !== '') url += 'max_price=' + maxPrice + '&';
+            if (type) url += 'property_type=' + encodeURIComponent(type) + '&';
+
+            const data = await apiFetch(url);
+            const grid = document.getElementById('listings-grid');
+            const count = document.getElementById('result-count');
+            if (!data || data.length === 0) {
+                grid.innerHTML = '<p class="no-listings">No listings found. Try adjusting your filters.</p>';
+                if (count) count.textContent = '';
+                return;
+            }
+            if (count) count.textContent = data.length + ' properties';
+            grid.innerHTML = data.map(listing => `
+                    <div class="listing-card" data-id="${listing.id}">
+                        <div class="listing-image">
+                            ${listing.images && listing.images.length > 0
+                                ? `<img src="/uploads/${listing.images[0].filename}" alt="${listing.title}" loading="lazy">`
+                                : `<div class="no-image">No image</div>`
+                            }
+                            <span class="listing-type-badge">${listing.property_type || 'Property'}</span>
+                        </div>
+                        <div class="listing-info">
+                            <h3>${listing.title}</h3>
+                            <p class="price">$${Number(listing.price).toLocaleString()}</p>
+                            <p class="location">📍 ${listing.location}</p>
+                            <p class="type">${listing.bedrooms || '?'} beds · ${listing.bathrooms || '?'} baths</p>
+                            <a href="/listing/${listing.id}" class="btn-view">View Details →</a>
+                        </div>
+                    </div>
+                `).join('');
+        }
+
+        // ---- Logout ----
+        async function handleLogout(e) {
+            e.preventDefault();
+            await apiFetch('/api/logout', { method: 'POST' });
+            updateAuthUI();
+            window.location.href = '/';
+        }
+
+        // ---- Init ----
+        window.onload = function() {
+            updateAuthUI();
+            loadListings();
+            document.getElementById('search-btn').addEventListener('click', loadListings);
+            const logoutBtn = document.getElementById('nav-logout');
+            if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
+
+            document.querySelectorAll('#search-location, #search-min-price, #search-max-price, #search-type')
+                .forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') loadListings(); }));
+        };
     </script>
-  </body>
+</body>
 </html>
