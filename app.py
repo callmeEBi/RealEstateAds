@@ -18,6 +18,7 @@ from flask_login import (
     login_required,
     current_user,
 )
+from flask_wtf.csrf import CSRFProtect, generate_csrf
 from werkzeug.utils import secure_filename
 from config import Config
 from models import db, User, Listing, Image
@@ -25,6 +26,9 @@ import click
 
 app = Flask(__name__, static_folder="static", static_url_path="/static")
 app.config.from_object(Config)
+
+# Initialize CSRF protection
+csrf = CSRFProtect(app)
 
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 os.makedirs(os.path.join(app.config["UPLOAD_FOLDER"], "thumbnails"), exist_ok=True)
@@ -62,6 +66,7 @@ def save_uploaded_files(files, listing_id):
     return uploaded
 
 
+# ---- Serve frontend pages ----
 @app.route("/")
 def index():
     return send_from_directory("static", "index.html")
@@ -113,6 +118,13 @@ def uploaded_file(filename):
     return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
 
 
+# ---- CSRF token endpoint ----
+@app.route("/api/csrf-token", methods=["GET"])
+def get_csrf_token():
+    return jsonify({"csrf_token": generate_csrf()})
+
+
+# ---- Auth endpoints ----
 @app.route("/api/register", methods=["POST"])
 def register():
     data = request.get_json()
@@ -179,12 +191,21 @@ def get_user():
     )
 
 
+# ---- Listing endpoints (with pagination) ----
 @app.route("/api/listings", methods=["GET"])
 def get_listings():
     location = request.args.get("location", "")
     min_price = request.args.get("min_price", type=float)
     max_price = request.args.get("max_price", type=float)
     property_type = request.args.get("property_type", "")
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 12, type=int)
+
+    # Validate pagination parameters
+    if page < 1:
+        page = 1
+    if per_page < 1 or per_page > 100:
+        per_page = 12
 
     query = Listing.query.filter_by(status="approved")
 
@@ -197,9 +218,14 @@ def get_listings():
     if property_type:
         query = query.filter_by(property_type=property_type)
 
-    listings = query.order_by(Listing.created_at.desc()).all()
+    # Order by newest first
+    query = query.order_by(Listing.created_at.desc())
+
+    # Paginate
+    paginated = query.paginate(page=page, per_page=per_page, error_out=False)
+
     result = []
-    for listing in listings:
+    for listing in paginated.items:
         result.append(
             {
                 "id": listing.id,
@@ -217,7 +243,18 @@ def get_listings():
                 "images": [{"filename": img.filename} for img in listing.images],
             }
         )
-    return jsonify(result)
+
+    return jsonify(
+        {
+            "data": result,
+            "meta": {
+                "total": paginated.total,
+                "page": paginated.page,
+                "per_page": paginated.per_page,
+                "total_pages": paginated.pages,
+            },
+        }
+    )
 
 
 @app.route("/api/listings/<int:listing_id>", methods=["GET"])
@@ -227,6 +264,9 @@ def get_listing(listing_id):
         not current_user.is_authenticated or current_user.id != listing.user_id
     ):
         return jsonify({"error": "Listing not available"}), 403
+
+    # Sort images by order
+    images = sorted(listing.images, key=lambda img: img.order)
 
     return jsonify(
         {
@@ -249,9 +289,29 @@ def get_listing(listing_id):
                 "phone": listing.seller.phone,
                 "email": listing.seller.email,
             },
-            "images": [{"filename": img.filename} for img in listing.images],
+            "images": [{"filename": img.filename} for img in images],
         }
     )
+
+
+def safe_float(value, default=None):
+    """Convert to float, return default if conversion fails."""
+    if value is None:
+        return default
+    try:
+        return float(value)
+    except (ValueError, TypeError):
+        return default
+
+
+def safe_int(value, default=None):
+    """Convert to int, return default if conversion fails."""
+    if value is None:
+        return default
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return default
 
 
 @app.route("/api/listings", methods=["POST"])
@@ -259,22 +319,24 @@ def get_listing(listing_id):
 def create_listing():
     title = request.form.get("title")
     description = request.form.get("description")
-    price = request.form.get("price")
+    price = safe_float(request.form.get("price"))
     location = request.form.get("location")
     property_type = request.form.get("property_type")
-    bedrooms = request.form.get("bedrooms", type=int)
-    bathrooms = request.form.get("bathrooms", type=int)
-    area = request.form.get("area", type=float)
+    bedrooms = safe_int(request.form.get("bedrooms"))
+    bathrooms = safe_int(request.form.get("bathrooms"))
+    area = safe_float(request.form.get("area"))
     contact_phone = request.form.get("contact_phone")
     contact_social = request.form.get("contact_social", "")
 
     if not all([title, description, price, location, property_type]):
         return jsonify({"error": "Missing required fields"}), 400
+    if price is None or price < 0:
+        return jsonify({"error": "Invalid price"}), 400
 
     listing = Listing(
         title=title,
         description=description,
-        price=float(price),
+        price=price,
         location=location,
         property_type=property_type,
         bedrooms=bedrooms,
@@ -302,16 +364,51 @@ def update_listing(listing_id):
     if listing.user_id != current_user.id:
         return jsonify({"error": "You can only edit your own listings"}), 403
 
-    listing.title = request.form.get("title", listing.title)
-    listing.description = request.form.get("description", listing.description)
-    listing.price = float(request.form.get("price", listing.price))
-    listing.location = request.form.get("location", listing.location)
-    listing.property_type = request.form.get("property_type", listing.property_type)
-    listing.bedrooms = request.form.get("bedrooms", type=int) or listing.bedrooms
-    listing.bathrooms = request.form.get("bathrooms", type=int) or listing.bathrooms
-    listing.area = request.form.get("area", type=float) or listing.area
-    listing.contact_phone = request.form.get("contact_phone", listing.contact_phone)
-    listing.contact_social = request.form.get("contact_social", listing.contact_social)
+    # Safely update fields
+    title = request.form.get("title")
+    if title is not None:
+        listing.title = title
+    description = request.form.get("description")
+    if description is not None:
+        listing.description = description
+
+    price_str = request.form.get("price")
+    if price_str is not None:
+        price = safe_float(price_str)
+        if price is None or price < 0:
+            return jsonify({"error": "Invalid price"}), 400
+        listing.price = price
+
+    location = request.form.get("location")
+    if location is not None:
+        listing.location = location
+    property_type = request.form.get("property_type")
+    if property_type is not None:
+        listing.property_type = property_type
+
+    bedrooms_str = request.form.get("bedrooms")
+    if bedrooms_str is not None:
+        bedrooms = safe_int(bedrooms_str)
+        if bedrooms is not None and bedrooms >= 0:
+            listing.bedrooms = bedrooms
+    bathrooms_str = request.form.get("bathrooms")
+    if bathrooms_str is not None:
+        bathrooms = safe_int(bathrooms_str)
+        if bathrooms is not None and bathrooms >= 0:
+            listing.bathrooms = bathrooms
+
+    area_str = request.form.get("area")
+    if area_str is not None:
+        area = safe_float(area_str)
+        if area is not None and area >= 0:
+            listing.area = area
+
+    contact_phone = request.form.get("contact_phone")
+    if contact_phone is not None:
+        listing.contact_phone = contact_phone
+    contact_social = request.form.get("contact_social")
+    if contact_social is not None:
+        listing.contact_social = contact_social
 
     files = request.files.getlist("images")
     if files:
@@ -428,13 +525,18 @@ def create_admin_command(email, password, name):
     click.echo(f"Admin user {email} created/updated successfully.")
 
 
+@app.errorhandler(404)
+def not_found(e):
+    return jsonify({"error": "Resource not found"}), 404
+
+
+@app.errorhandler(500)
+def internal_error(e):
+    return jsonify({"error": "Internal server error"}), 500
+
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-        if not User.query.filter_by(role="admin").first():
-            admin = User(name="Default Admin", email="admin@example.com", role="admin")
-            admin.set_password("admin123")
-            db.session.add(admin)
-            db.session.commit()
-            print("Default admin created: admin@example.com / admin123")
+        # Do not auto-create admin in production; use CLI command instead.
     app.run(debug=True)
