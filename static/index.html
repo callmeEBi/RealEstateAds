@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>seyed RealEstate · Find Your Dream Home</title>
     <link rel="stylesheet" href="/static/css/style.css" />
-    <link rel="icon" href="../images/main_logo.jpg?v=2" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
-    <script src="/static/js/security.js"></script>
   </head>
+
   <body>
     <!-- Navbar -->
     <nav class="navbar">
       <div class="container nav-container">
         <a href="/" class="brand">🏠 seyed RealEstate</a>
+
         <button
           class="nav-toggle"
           id="navToggle"
@@ -21,12 +21,15 @@
         >
           <span></span><span></span><span></span>
         </button>
+
         <div class="nav-links" id="navLinks">
           <a href="/">Home</a>
+
           <span id="auth-links">
             <a href="/login">Login</a>
             <a href="/register">Register</a>
           </span>
+
           <span id="user-links" style="display: none">
             <a href="/dashboard">Dashboard</a>
             <a href="#" id="logout-link">Logout</a>
@@ -39,25 +42,29 @@
     <section class="hero">
       <div class="container">
         <h1>Find Your Dream Property</h1>
-        <p>Browse through thousands of listings and connect with sellers.</p>
+        <p>Browse listings and connect with sellers.</p>
+
         <div class="search-bar">
           <input
             type="text"
             id="search-location"
             placeholder="Location (city)"
           />
+
           <input
             type="number"
             id="search-min-price"
             placeholder="Min price"
             min="0"
           />
+
           <input
             type="number"
             id="search-max-price"
             placeholder="Max price"
             min="0"
           />
+
           <select id="search-type">
             <option value="">All Types</option>
             <option value="Apartment">Apartment</option>
@@ -66,6 +73,7 @@
             <option value="Townhouse">Townhouse</option>
             <option value="Other">Other</option>
           </select>
+
           <button id="search-btn">Search</button>
         </div>
       </div>
@@ -78,64 +86,56 @@
           <h2>Latest Properties</h2>
           <span class="section-badge" id="result-count"></span>
         </div>
+
         <div class="listings-grid" id="listings-grid">
           <p class="no-listings">Loading…</p>
         </div>
-        <!-- Pagination will be injected here -->
+
+        <div id="pagination-container"></div>
       </div>
     </section>
 
     <script src="/static/js/app.js"></script>
-    <script src="/static/js/api.js"></script>
-    <script>
-      // ---- Nav toggle ----
-      const toggle = document.getElementById("navToggle");
-      const links = document.getElementById("navLinks");
-      if (toggle && links) {
-        toggle.addEventListener("click", function (e) {
-          e.stopPropagation();
-          links.classList.toggle("open");
-          toggle.classList.toggle("active");
-        });
-        document.addEventListener("click", function (e) {
-          if (!links.contains(e.target) && !toggle.contains(e.target)) {
-            links.classList.remove("open");
-            toggle.classList.remove("active");
-          }
-        });
-      }
 
+    <script>
       // ---- Auth UI ----
-      function updateAuthUI() {
-        fetch("/api/user")
-          .then((r) => r.json())
-          .then((user) => {
-            const authLinks = document.getElementById("auth-links");
-            const userLinks = document.getElementById("user-links");
-            if (user && user.id) {
-              if (authLinks) authLinks.style.display = "none";
-              if (userLinks) userLinks.style.display = "inline-flex";
-              const dash = document.querySelector("#user-links a:first-child");
-              if (dash) {
-                if (user.role === "admin") {
-                  dash.textContent = "Admin Panel";
-                  dash.href = "/admin";
-                } else {
-                  dash.textContent = "Dashboard";
-                  dash.href = "/dashboard";
-                }
+      async function updateAuthUI() {
+        try {
+          const user = await apiFetch("/api/user");
+
+          const authLinks = document.getElementById("auth-links");
+          const userLinks = document.getElementById("user-links");
+
+          if (user && user.authenticated && user.id) {
+            if (authLinks) authLinks.style.display = "none";
+            if (userLinks) userLinks.style.display = "inline-flex";
+
+            const dashboardLink = document.querySelector(
+              "#user-links a:first-child",
+            );
+
+            if (dashboardLink) {
+              if (user.role === "admin") {
+                dashboardLink.textContent = "Admin Panel";
+                dashboardLink.href = "/admin";
+              } else {
+                dashboardLink.textContent = "Dashboard";
+                dashboardLink.href = "/dashboard";
               }
-            } else {
-              if (authLinks) authLinks.style.display = "inline-flex";
-              if (userLinks) userLinks.style.display = "none";
             }
-          })
-          .catch(() => {});
+          } else {
+            if (authLinks) authLinks.style.display = "inline-flex";
+            if (userLinks) userLinks.style.display = "none";
+          }
+        } catch (err) {
+          console.error("Auth UI error:", err);
+        }
       }
 
       // ---- Logout ----
       async function handleLogout(e) {
         e.preventDefault();
+
         try {
           await apiFetch("/api/logout", { method: "POST" });
           window.location.href = "/";
@@ -146,99 +146,238 @@
 
       // ---- Load listings with pagination ----
       async function loadListings(page = 1) {
-        const location = document.getElementById("search-location").value.trim();
-        let minPrice = document.getElementById("search-min-price").value;
-        let maxPrice = document.getElementById("search-max-price").value;
-        const type = document.getElementById("search-type").value;
+        const locationInput = document.getElementById("search-location");
+        const minPriceInput = document.getElementById("search-min-price");
+        const maxPriceInput = document.getElementById("search-max-price");
+        const typeInput = document.getElementById("search-type");
 
-        // Validate numeric inputs
+        const location = locationInput.value.trim();
+        let minPrice = minPriceInput.value;
+        let maxPrice = maxPriceInput.value;
+        const type = typeInput.value;
+
         if (minPrice !== "") {
           const num = parseFloat(minPrice);
-          if (isNaN(num) || num < 0) minPrice = "";
-          else minPrice = num;
+
+          if (isNaN(num) || num < 0) {
+            minPrice = "";
+          } else {
+            minPrice = num;
+          }
         }
+
         if (maxPrice !== "") {
           const num = parseFloat(maxPrice);
-          if (isNaN(num) || num < 0) maxPrice = "";
-          else maxPrice = num;
+
+          if (isNaN(num) || num < 0) {
+            maxPrice = "";
+          } else {
+            maxPrice = num;
+          }
         }
 
         let url = `/api/listings?page=${page}&per_page=12`;
-        if (location) url += "&location=" + encodeURIComponent(location);
-        if (minPrice !== "") url += "&min_price=" + minPrice;
-        if (maxPrice !== "") url += "&max_price=" + maxPrice;
-        if (type) url += "&property_type=" + encodeURIComponent(type);
+
+        if (location) {
+          url += "&location=" + encodeURIComponent(location);
+        }
+
+        if (minPrice !== "") {
+          url += "&min_price=" + encodeURIComponent(minPrice);
+        }
+
+        if (maxPrice !== "") {
+          url += "&max_price=" + encodeURIComponent(maxPrice);
+        }
+
+        if (type) {
+          url += "&property_type=" + encodeURIComponent(type);
+        }
 
         const grid = document.getElementById("listings-grid");
         const count = document.getElementById("result-count");
+        const paginationContainer = document.getElementById(
+          "pagination-container",
+        );
+
+        grid.innerHTML = '<p class="no-listings">Loading…</p>';
+        paginationContainer.innerHTML = "";
 
         try {
           const data = await apiFetch(url);
+
           const listings = data.data || [];
           const meta = data.meta || {};
 
-          if (!listings || listings.length === 0) {
-            grid.innerHTML = '<p class="no-listings">No listings found. Try adjusting your filters.</p>';
-            if (count) count.textContent = "";
+          if (!listings.length) {
+            grid.innerHTML =
+              '<p class="no-listings">No listings found. Try adjusting your filters.</p>';
+
+            if (count) {
+              count.textContent = "0 properties";
+            }
+
             return;
           }
-          if (count) count.textContent = meta.total + " properties";
+
+          if (count) {
+            count.textContent = `${meta.total} properties`;
+          }
 
           let html = "";
+
           listings.forEach((listing) => {
-            const title = sanitizeHTML(listing.title);
+            const title = escapeHTML(listing.title);
             const price = Number(listing.price).toLocaleString();
-            const location = sanitizeHTML(listing.location);
-            const type = listing.property_type || "Property";
-            const bedrooms = listing.bedrooms || "?";
-            const bathrooms = listing.bathrooms || "?";
-            const imageHtml =
-              listing.images && listing.images.length > 0
-                ? `<img src="/uploads/${listing.images[0].filename}" alt="${title}" loading="lazy">`
-                : `<div class="no-image">No image</div>`;
+            const location = escapeHTML(listing.location);
+            const type = escapeHTML(listing.property_type || "Property");
+            const bedrooms =
+              listing.bedrooms === null || listing.bedrooms === undefined
+                ? "?"
+                : escapeHTML(listing.bedrooms);
+            const bathrooms =
+              listing.bathrooms === null || listing.bathrooms === undefined
+                ? "?"
+                : escapeHTML(listing.bathrooms);
+
+            let imageHtml = `<div class="no-image">No image</div>`;
+
+            if (listing.images && listing.images.length > 0) {
+              const filename = encodeURIComponent(listing.images[0].filename);
+
+              imageHtml = `
+                <img
+                  src="/uploads/${filename}"
+                  alt="${title}"
+                  loading="lazy"
+                >
+              `;
+            }
+
             html += `
               <div class="listing-card" data-id="${listing.id}">
                 <div class="listing-image">
                   ${imageHtml}
-                  <span class="listing-type-badge">${sanitizeHTML(type)}</span>
+                  <span class="listing-type-badge">${type}</span>
                 </div>
+
                 <div class="listing-info">
                   <h3>${title}</h3>
                   <p class="price">$${price}</p>
                   <p class="location">📍 ${location}</p>
                   <p class="type">${bedrooms} beds · ${bathrooms} baths</p>
-                <a href="/listing/${listing.id}" class="btn-view">View Details →</a>
+                  <a href="/listing/${listing.id}" class="btn-view">
+                    View Details →
+                  </a>
+                </div>
               </div>
-            </div>
-          `;
-        });
-        grid.innerHTML = sanitizeHTML(html); // sanitize entire block
+            `;
+          });
 
-        // Add pagination controls (simple example)
-        let paginationHtml = '';
-        if (meta.total_pages > 1) {
-          paginationHtml = '<div class="pagination">';
-          if (meta.page > 1) {
-            paginationHtml += `<button onclick="loadListings(${meta.page - 1})">Prev</button>`;
+          grid.innerHTML = html;
+
+          renderPagination(meta);
+        } catch (err) {
+          console.error(err);
+
+          grid.innerHTML = `
+            <p class="no-listings">
+              Error loading listings: ${escapeHTML(err.message)}
+            </p>
+          `;
+
+          if (count) {
+            count.textContent = "";
           }
-          paginationHtml += `<span>Page ${meta.page} of ${meta.total_pages}</span>`;
-          if (meta.page < meta.total_pages) {
-            paginationHtml += `<button onclick="loadListings(${meta.page + 1})">Next</button>`;
-          }
-          paginationHtml += '</div>';
-        }
-        // Insert pagination after grid
-        const existingPagination = document.querySelector('.pagination');
-        if (existingPagination) existingPagination.remove();
-        if (paginationHtml) {
-          const paginationDiv = document.createElement('div');
-          paginationDiv.className = 'pagination';
-          paginationDiv.innerHTML = sanitizeHTML(paginationHtml);
-          grid.parentNode.appendChild(paginationDiv);
         }
       }
 
-      // ... rest (logout, search button, etc.) ...
+      // ---- Pagination ----
+      function renderPagination(meta) {
+        const paginationContainer = document.getElementById(
+          "pagination-container",
+        );
+
+        if (!meta || !meta.total_pages || meta.total_pages <= 1) {
+          paginationContainer.innerHTML = "";
+          return;
+        }
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "pagination";
+        wrapper.style.marginTop = "20px";
+        wrapper.style.display = "flex";
+        wrapper.style.justifyContent = "center";
+        wrapper.style.alignItems = "center";
+        wrapper.style.gap = "12px";
+
+        if (meta.page > 1) {
+          const prevButton = document.createElement("button");
+          prevButton.textContent = "Prev";
+          prevButton.className = "btn-primary";
+          prevButton.style.width = "auto";
+          prevButton.addEventListener("click", function () {
+            loadListings(meta.page - 1);
+          });
+
+          wrapper.appendChild(prevButton);
+        }
+
+        const pageText = document.createElement("span");
+        pageText.textContent = `Page ${meta.page} of ${meta.total_pages}`;
+        wrapper.appendChild(pageText);
+
+        if (meta.page < meta.total_pages) {
+          const nextButton = document.createElement("button");
+          nextButton.textContent = "Next";
+          nextButton.className = "btn-primary";
+          nextButton.style.width = "auto";
+          nextButton.addEventListener("click", function () {
+            loadListings(meta.page + 1);
+          });
+
+          wrapper.appendChild(nextButton);
+        }
+
+        paginationContainer.innerHTML = "";
+        paginationContainer.appendChild(wrapper);
+      }
+
+      // ---- Page initialization ----
+      document.addEventListener("DOMContentLoaded", function () {
+        updateAuthUI();
+        loadListings();
+
+        const searchBtn = document.getElementById("search-btn");
+
+        if (searchBtn) {
+          searchBtn.addEventListener("click", function () {
+            loadListings(1);
+          });
+        }
+
+        const logoutLink = document.getElementById("logout-link");
+
+        if (logoutLink) {
+          logoutLink.addEventListener("click", handleLogout);
+        }
+
+        const searchInputs = [
+          document.getElementById("search-location"),
+          document.getElementById("search-min-price"),
+          document.getElementById("search-max-price"),
+        ];
+
+        searchInputs.forEach(function (input) {
+          if (!input) return;
+
+          input.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+              loadListings(1);
+            }
+          });
+        });
+      });
     </script>
   </body>
 </html>
