@@ -1,4 +1,3 @@
-````markdown
 # RealEstateAds
 
 RealEstateAds is a Flask-based real estate listing web application. Users can register, log in, create property listings with images, browse approved listings, and contact sellers. Admin users can review, approve, or reject submitted listings.
