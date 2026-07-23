@@ -1,174 +1,198 @@
 <!doctype html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Edit Listing - RealEstate</title>
     <link rel="stylesheet" href="/static/css/style.css" />
-</head>
-<body>
+  </head>
+  <body>
     <nav class="navbar">
-        <div class="container nav-container">
-            <a href="/" class="brand">🏠seyed RealEstate</a>
-            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
-                <span></span><span></span><span></span>
-            </button>
-            <div class="nav-links" id="navLinks">
-                <a href="/">Home</a>
-                <a href="/dashboard">Dashboard</a>
-            </div>
+      <div class="container nav-container">
+        <a href="/" class="brand">🏠seyed RealEstate</a>
+        <button
+          class="nav-toggle"
+          id="navToggle"
+          aria-label="Toggle navigation"
+        >
+          <span></span><span></span><span></span>
+        </button>
+        <div class="nav-links" id="navLinks">
+          <a href="/">Home</a>
+          <a href="/dashboard">Dashboard</a>
         </div>
+      </div>
     </nav>
 
     <div class="form-container">
-        <h2>Edit Listing</h2>
-        <form id="edit-form" enctype="multipart/form-data">
-            <input type="hidden" id="listing-id" />
+      <h2>Edit Listing</h2>
+      <form id="edit-form" enctype="multipart/form-data">
+        <input type="hidden" id="listing-id" />
 
-            <!-- Title -->
-            <div class="form-group">
-                <label for="title">Title</label>
-                <input type="text" id="title" name="title" required />
-            </div>
+        <!-- Title -->
+        <div class="form-group">
+          <label for="title">Title</label>
+          <input type="text" id="title" name="title" required />
+        </div>
 
-            <!-- Description -->
-            <div class="form-group">
-                <label for="description">Description</label>
-                <textarea id="description" name="description" required></textarea>
-            </div>
+        <!-- Description -->
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" required></textarea>
+        </div>
 
-            <!-- Row: Price + Location -->
-            <div class="form-row">
-                <div class="form-group half">
-                    <label for="price">Price ($)</label>
-                    <input type="number" id="price" name="price" step="0.01" min="0" required />
-                </div>
-                <div class="form-group half">
-                    <label for="location">Location (City)</label>
-                    <input type="text" id="location" name="location" required />
-                </div>
-            </div>
+        <!-- Row: Price + Location -->
+        <div class="form-row">
+          <div class="form-group half">
+            <label for="price">Price ($)</label>
+            <input
+              type="number"
+              id="price"
+              name="price"
+              step="0.01"
+              min="0"
+              required
+            />
+          </div>
+          <div class="form-group half">
+            <label for="location">Location (City)</label>
+            <input type="text" id="location" name="location" required />
+          </div>
+        </div>
 
-            <!-- Row: Property Type + Area -->
-            <div class="form-row">
-                <div class="form-group half">
-                    <label for="property_type">Property Type</label>
-                    <select id="property_type" name="property_type" required>
-                        <option value="Apartment">Apartment</option>
-                        <option value="Villa">Villa</option>
-                        <option value="Land">Land</option>
-                        <option value="Townhouse">Townhouse</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-                <div class="form-group half">
-                    <label for="area">Area (sq ft)</label>
-                    <input type="number" id="area" name="area" step="0.1" min="0" />
-                </div>
-            </div>
+        <!-- Row: Property Type + Area -->
+        <div class="form-row">
+          <div class="form-group half">
+            <label for="property_type">Property Type</label>
+            <select id="property_type" name="property_type" required>
+              <option value="Apartment">Apartment</option>
+              <option value="Villa">Villa</option>
+              <option value="Land">Land</option>
+              <option value="Townhouse">Townhouse</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group half">
+            <label for="area">Area (sq ft)</label>
+            <input type="number" id="area" name="area" step="0.1" min="0" />
+          </div>
+        </div>
 
-            <!-- Row: Bedrooms + Bathrooms -->
-            <div class="form-row">
-                <div class="form-group half">
-                    <label for="bedrooms">Bedrooms</label>
-                    <input type="number" id="bedrooms" name="bedrooms" min="0" />
-                </div>
-                <div class="form-group half">
-                    <label for="bathrooms">Bathrooms</label>
-                    <input type="number" id="bathrooms" name="bathrooms" min="0" />
-                </div>
-            </div>
+        <!-- Row: Bedrooms + Bathrooms -->
+        <div class="form-row">
+          <div class="form-group half">
+            <label for="bedrooms">Bedrooms</label>
+            <input type="number" id="bedrooms" name="bedrooms" min="0" />
+          </div>
+          <div class="form-group half">
+            <label for="bathrooms">Bathrooms</label>
+            <input type="number" id="bathrooms" name="bathrooms" min="0" />
+          </div>
+        </div>
 
-            <!-- Row: Contact Phone + Social -->
-            <div class="form-row">
-                <div class="form-group half">
-                    <label for="contact_phone">Contact Phone</label>
-                    <input type="text" id="contact_phone" name="contact_phone" />
-                </div>
-                <div class="form-group half">
-                    <label for="contact_social">Social Media</label>
-                    <input type="text" id="contact_social" name="contact_social" />
-                </div>
-            </div>
+        <!-- Row: Contact Phone + Social -->
+        <div class="form-row">
+          <div class="form-group half">
+            <label for="contact_phone">Contact Phone</label>
+            <input type="text" id="contact_phone" name="contact_phone" />
+          </div>
+          <div class="form-group half">
+            <label for="contact_social">Social Media</label>
+            <input type="text" id="contact_social" name="contact_social" />
+          </div>
+        </div>
 
-            <!-- Images -->
-            <div class="form-group">
-                <label for="images">Add more images (optional)</label>
-                <input type="file" id="images" name="images" accept="image/*" multiple />
-                <small>Select images to append to the existing ones.</small>
-            </div>
+        <!-- Images -->
+        <div class="form-group">
+          <label for="images">Add more images (optional)</label>
+          <input
+            type="file"
+            id="images"
+            name="images"
+            accept="image/*"
+            multiple
+          />
+          <small>Select images to append to the existing ones.</small>
+        </div>
 
-            <div id="edit-error" class="error-message"></div>
-            <button type="submit" class="btn-primary">Update Listing</button>
-        </form>
+        <div id="edit-error" class="error-message"></div>
+        <button type="submit" class="btn-primary">Update Listing</button>
+      </form>
     </div>
 
     <script src="/static/js/app.js"></script>
     <script>
-        // Nav toggle
-        const toggle = document.getElementById('navToggle');
-        const links = document.getElementById('navLinks');
-        if (toggle && links) {
-            toggle.addEventListener('click', function(e) {
-                e.stopPropagation();
-                links.classList.toggle('open');
-                toggle.classList.toggle('active');
-            });
-            document.addEventListener('click', function(e) {
-                if (!links.contains(e.target) && !toggle.contains(e.target)) {
-                    links.classList.remove('open');
-                    toggle.classList.remove('active');
-                }
-            });
+      // Nav toggle
+      const toggle = document.getElementById("navToggle");
+      const links = document.getElementById("navLinks");
+      if (toggle && links) {
+        toggle.addEventListener("click", function (e) {
+          e.stopPropagation();
+          links.classList.toggle("open");
+          toggle.classList.toggle("active");
+        });
+        document.addEventListener("click", function (e) {
+          if (!links.contains(e.target) && !toggle.contains(e.target)) {
+            links.classList.remove("open");
+            toggle.classList.remove("active");
+          }
+        });
+      }
+
+      const pathParts = window.location.pathname.split("/");
+      const listingId = pathParts[pathParts.length - 1];
+
+      window.onload = async function () {
+        const data = await apiFetch(`/api/listings/${listingId}`);
+        document.getElementById("listing-id").value = data.id;
+        document.getElementById("title").value = data.title;
+        document.getElementById("description").value = data.description;
+        document.getElementById("price").value = data.price;
+        document.getElementById("location").value = data.location;
+        document.getElementById("property_type").value = data.property_type;
+        document.getElementById("bedrooms").value = data.bedrooms || "";
+        document.getElementById("bathrooms").value = data.bathrooms || "";
+        document.getElementById("area").value = data.area || "";
+        document.getElementById("contact_phone").value =
+          data.contact_phone || "";
+        document.getElementById("contact_social").value =
+          data.contact_social || "";
+
+        if (data.images && data.images.length > 0) {
+          const imgContainer = document.createElement("div");
+          imgContainer.innerHTML = "<p><strong>Existing Images:</strong></p>";
+          data.images.forEach((img) => {
+            const imgEl = document.createElement("img");
+            imgEl.src = `/uploads/${img.filename}`;
+            imgEl.style.width = "100px";
+            imgEl.style.margin = "5px";
+            imgContainer.appendChild(imgEl);
+          });
+          document
+            .querySelector(".form-container")
+            .insertBefore(imgContainer, document.getElementById("edit-form"));
         }
+      };
 
-        const pathParts = window.location.pathname.split('/');
-        const listingId = pathParts[pathParts.length - 1];
+      document
+        .getElementById("edit-form")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+          const id = document.getElementById("listing-id").value;
+          const formData = new FormData(this);
+          formData.delete("listing-id");
 
-        window.onload = async function () {
-            const data = await apiFetch(`/api/listings/${listingId}`);
-            document.getElementById('listing-id').value = data.id;
-            document.getElementById('title').value = data.title;
-            document.getElementById('description').value = data.description;
-            document.getElementById('price').value = data.price;
-            document.getElementById('location').value = data.location;
-            document.getElementById('property_type').value = data.property_type;
-            document.getElementById('bedrooms').value = data.bedrooms || '';
-            document.getElementById('bathrooms').value = data.bathrooms || '';
-            document.getElementById('area').value = data.area || '';
-            document.getElementById('contact_phone').value = data.contact_phone || '';
-            document.getElementById('contact_social').value = data.contact_social || '';
-
-            if (data.images && data.images.length > 0) {
-                const imgContainer = document.createElement('div');
-                imgContainer.innerHTML = '<p><strong>Existing Images:</strong></p>';
-                data.images.forEach(img => {
-                    const imgEl = document.createElement('img');
-                    imgEl.src = `/uploads/${img.filename}`;
-                    imgEl.style.width = '100px';
-                    imgEl.style.margin = '5px';
-                    imgContainer.appendChild(imgEl);
-                });
-                document.querySelector('.form-container').insertBefore(imgContainer, document.getElementById('edit-form'));
-            }
-        };
-
-        document.getElementById('edit-form').addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const id = document.getElementById('listing-id').value;
-            const formData = new FormData(this);
-            formData.delete('listing-id');
-
-            try {
-                await apiFetch(`/api/listings/${id}`, {
-                    method: 'PUT',
-                    body: formData,
-                });
-                window.location.href = '/dashboard?updated=true';
-            } catch (err) {
-                document.getElementById('edit-error').textContent = err.message || 'Update failed.';
-            }
+          try {
+            await apiFetch(`/api/listings/${id}`, {
+              method: "PUT",
+              body: formData,
+            });
+            window.location.href = "/dashboard?updated=true";
+          } catch (err) {
+            document.getElementById("edit-error").textContent =
+              err.message || "Update failed.";
+          }
         });
     </script>
-</body>
+  </body>
 </html>

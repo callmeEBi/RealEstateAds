@@ -1,88 +1,95 @@
 <!doctype html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Register - RealEstate</title>
     <link rel="stylesheet" href="/static/css/style.css" />
-</head>
-<body>
+  </head>
+  <body>
     <nav class="navbar">
-        <div class="container nav-container">
-            <a href="/" class="brand">🏠seyed RealEstate</a>
-            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
-                <span></span><span></span><span></span>
-            </button>
-            <div class="nav-links" id="navLinks">
-                <a href="/">Home</a>
-                <a href="/login">Login</a>
-            </div>
+      <div class="container nav-container">
+        <a href="/" class="brand">🏠seyed RealEstate</a>
+        <button
+          class="nav-toggle"
+          id="navToggle"
+          aria-label="Toggle navigation"
+        >
+          <span></span><span></span><span></span>
+        </button>
+        <div class="nav-links" id="navLinks">
+          <a href="/">Home</a>
+          <a href="/login">Login</a>
         </div>
+      </div>
     </nav>
 
     <div class="form-container">
-        <h2>Create Account</h2>
-        <form id="register-form">
-            <div class="form-group">
-                <label for="name">Full Name</label>
-                <input type="text" id="name" required />
-            </div>
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" required />
-            </div>
-            <div class="form-group">
-                <label for="phone">Phone (optional)</label>
-                <input type="text" id="phone" />
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" required minlength="6" />
-            </div>
-            <div id="register-error" class="error-message"></div>
-            <button type="submit" class="btn-primary">Register</button>
-            <p class="form-footer">
-                Already have an account? <a href="/login">Log In</a>
-            </p>
-        </form>
+      <h2>Create Account</h2>
+      <form id="register-form">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" required />
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" required />
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone (optional)</label>
+          <input type="text" id="phone" />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required minlength="6" />
+        </div>
+        <div id="register-error" class="error-message"></div>
+        <button type="submit" class="btn-primary">Register</button>
+        <p class="form-footer">
+          Already have an account? <a href="/login">Log In</a>
+        </p>
+      </form>
     </div>
 
     <script src="/static/js/app.js"></script>
     <script>
-        // Nav toggle
-        const toggle = document.getElementById('navToggle');
-        const links = document.getElementById('navLinks');
-        if (toggle && links) {
-            toggle.addEventListener('click', function(e) {
-                e.stopPropagation();
-                links.classList.toggle('open');
-                toggle.classList.toggle('active');
-            });
-            document.addEventListener('click', function(e) {
-                if (!links.contains(e.target) && !toggle.contains(e.target)) {
-                    links.classList.remove('open');
-                    toggle.classList.remove('active');
-                }
-            });
-        }
+      // Nav toggle
+      const toggle = document.getElementById("navToggle");
+      const links = document.getElementById("navLinks");
+      if (toggle && links) {
+        toggle.addEventListener("click", function (e) {
+          e.stopPropagation();
+          links.classList.toggle("open");
+          toggle.classList.toggle("active");
+        });
+        document.addEventListener("click", function (e) {
+          if (!links.contains(e.target) && !toggle.contains(e.target)) {
+            links.classList.remove("open");
+            toggle.classList.remove("active");
+          }
+        });
+      }
 
-        document.getElementById('register-form').addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
-            const password = document.getElementById('password').value;
+      document
+        .getElementById("register-form")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+          const name = document.getElementById("name").value;
+          const email = document.getElementById("email").value;
+          const phone = document.getElementById("phone").value;
+          const password = document.getElementById("password").value;
 
-            try {
-                await apiFetch('/api/register', {
-                    method: 'POST',
-                    body: JSON.stringify({ name, email, phone, password }),
-                });
-                window.location.href = '/login?registered=true';
-            } catch (err) {
-                document.getElementById('register-error').textContent = err.message || 'Registration failed.';
-            }
+          try {
+            await apiFetch("/api/register", {
+              method: "POST",
+              body: JSON.stringify({ name, email, phone, password }),
+            });
+            window.location.href = "/login?registered=true";
+          } catch (err) {
+            document.getElementById("register-error").textContent =
+              err.message || "Registration failed.";
+          }
         });
     </script>
-</body>
+  </body>
 </html>

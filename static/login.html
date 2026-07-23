@@ -1,79 +1,86 @@
 <!doctype html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login - RealEstate</title>
     <link rel="stylesheet" href="/static/css/style.css" />
-</head>
-<body>
+  </head>
+  <body>
     <nav class="navbar">
-        <div class="container nav-container">
-            <a href="/" class="brand">🏠seyed RealEstate</a>
-            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
-                <span></span><span></span><span></span>
-            </button>
-            <div class="nav-links" id="navLinks">
-                <a href="/">Home</a>
-            </div>
+      <div class="container nav-container">
+        <a href="/" class="brand">🏠seyed RealEstate</a>
+        <button
+          class="nav-toggle"
+          id="navToggle"
+          aria-label="Toggle navigation"
+        >
+          <span></span><span></span><span></span>
+        </button>
+        <div class="nav-links" id="navLinks">
+          <a href="/">Home</a>
         </div>
+      </div>
     </nav>
 
     <div class="form-container">
-        <h2>Log In</h2>
-        <form id="login-form">
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" required />
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" required />
-            </div>
-            <div id="login-error" class="error-message"></div>
-            <button type="submit" class="btn-primary">Log In</button>
-            <p class="form-footer">
-                Don't have an account? <a href="/register">Register</a>
-            </p>
-        </form>
+      <h2>Log In</h2>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" required />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required />
+        </div>
+        <div id="login-error" class="error-message"></div>
+        <button type="submit" class="btn-primary">Log In</button>
+        <p class="form-footer">
+          Don't have an account? <a href="/register">Register</a>
+        </p>
+      </form>
     </div>
 
     <script src="/static/js/app.js"></script>
     <script>
-        // Nav toggle
-        const toggle = document.getElementById('navToggle');
-        const links = document.getElementById('navLinks');
-        if (toggle && links) {
-            toggle.addEventListener('click', function(e) {
-                e.stopPropagation();
-                links.classList.toggle('open');
-                toggle.classList.toggle('active');
-            });
-            document.addEventListener('click', function(e) {
-                if (!links.contains(e.target) && !toggle.contains(e.target)) {
-                    links.classList.remove('open');
-                    toggle.classList.remove('active');
-                }
-            });
-        }
+      // Nav toggle
+      const toggle = document.getElementById("navToggle");
+      const links = document.getElementById("navLinks");
+      if (toggle && links) {
+        toggle.addEventListener("click", function (e) {
+          e.stopPropagation();
+          links.classList.toggle("open");
+          toggle.classList.toggle("active");
+        });
+        document.addEventListener("click", function (e) {
+          if (!links.contains(e.target) && !toggle.contains(e.target)) {
+            links.classList.remove("open");
+            toggle.classList.remove("active");
+          }
+        });
+      }
 
-        document.getElementById('login-form').addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+      document
+        .getElementById("login-form")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
 
-            try {
-                const data = await apiFetch('/api/login', {
-                    method: 'POST',
-                    body: JSON.stringify({ email, password }),
-                });
-                if (data.user) {
-                    window.location.href = '/dashboard';
-                }
-            } catch (err) {
-                document.getElementById('login-error').textContent = err.message || 'Login failed. Please try again.';
+          try {
+            const data = await apiFetch("/api/login", {
+              method: "POST",
+              body: JSON.stringify({ email, password }),
+            });
+            if (data.user) {
+              window.location.href = "/dashboard";
             }
+          } catch (err) {
+            document.getElementById("login-error").textContent =
+              err.message || "Login failed. Please try again.";
+          }
         });
     </script>
-</body>
+  </body>
 </html>
