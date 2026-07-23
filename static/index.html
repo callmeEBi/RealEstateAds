@@ -3,16 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>seyed RealEstate · Find Your Dream Home</title>
+    <title>seyed Real Estate · Find Your Dream Home</title>
     <link rel="stylesheet" href="/static/css/style.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
   </head>
 
   <body>
-    <!-- Navbar -->
     <nav class="navbar">
       <div class="container nav-container">
-        <a href="/" class="brand">🏠 seyed RealEstate</a>
+        <a href="/" class="brand">🏠 Seyed Real Estate</a>
 
         <button
           class="nav-toggle"
@@ -38,7 +37,6 @@
       </div>
     </nav>
 
-    <!-- Hero -->
     <section class="hero">
       <div class="container">
         <h1>Find Your Dream Property</h1>
@@ -79,7 +77,6 @@
       </div>
     </section>
 
-    <!-- Listings -->
     <section class="listings-section">
       <div class="container">
         <div class="section-header">
@@ -98,7 +95,6 @@
     <script src="/static/js/app.js"></script>
 
     <script>
-      // ---- Auth UI ----
       async function updateAuthUI() {
         try {
           const user = await apiFetch("/api/user");
@@ -132,7 +128,6 @@
         }
       }
 
-      // ---- Logout ----
       async function handleLogout(e) {
         e.preventDefault();
 
@@ -144,7 +139,6 @@
         }
       }
 
-      // ---- Load listings with pagination ----
       async function loadListings(page = 1) {
         const locationInput = document.getElementById("search-location");
         const minPriceInput = document.getElementById("search-min-price");
@@ -292,7 +286,6 @@
         }
       }
 
-      // ---- Pagination ----
       function renderPagination(meta) {
         const paginationContainer = document.getElementById(
           "pagination-container",
@@ -343,7 +336,6 @@
         paginationContainer.appendChild(wrapper);
       }
 
-      // ---- Page initialization ----
       document.addEventListener("DOMContentLoaded", function () {
         updateAuthUI();
         loadListings();

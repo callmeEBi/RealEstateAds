@@ -3,13 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Create Listing - RealEstate</title>
+    <title>Create Listing - Real Estate</title>
     <link rel="stylesheet" href="/static/css/style.css" />
   </head>
   <body>
     <nav class="navbar">
       <div class="container nav-container">
-        <a href="/" class="brand">🏠seyed RealEstate</a>
+        <a href="/" class="brand">🏠Seyed Real Estate</a>
         <button
           class="nav-toggle"
           id="navToggle"
@@ -27,19 +27,16 @@
     <div class="form-container">
       <h2>Create New Listing</h2>
       <form id="create-form" enctype="multipart/form-data">
-        <!-- Title -->
         <div class="form-group">
           <label for="title">Title</label>
           <input type="text" id="title" name="title" required />
         </div>
 
-        <!-- Description -->
         <div class="form-group">
           <label for="description">Description</label>
           <textarea id="description" name="description" required></textarea>
         </div>
 
-        <!-- Row: Price + Location -->
         <div class="form-row">
           <div class="form-group half">
             <label for="price">Price ($)</label>
@@ -58,7 +55,6 @@
           </div>
         </div>
 
-        <!-- Row: Property Type + Area -->
         <div class="form-row">
           <div class="form-group half">
             <label for="property_type">Property Type</label>
@@ -76,7 +72,6 @@
           </div>
         </div>
 
-        <!-- Row: Bedrooms + Bathrooms -->
         <div class="form-row">
           <div class="form-group half">
             <label for="bedrooms">Bedrooms</label>
@@ -88,7 +83,6 @@
           </div>
         </div>
 
-        <!-- Row: Contact Phone + Social -->
         <div class="form-row">
           <div class="form-group half">
             <label for="contact_phone">Contact Phone</label>
@@ -100,7 +94,6 @@
           </div>
         </div>
 
-        <!-- Images -->
         <div class="form-group">
           <label for="images">Upload Images (multiple)</label>
           <input
@@ -120,7 +113,6 @@
 
     <script src="/static/js/app.js"></script>
     <script>
-      // Nav toggle
       const toggle = document.getElementById("navToggle");
       const links = document.getElementById("navLinks");
       if (toggle && links) {

@@ -3,17 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Listing Details - RealEstate</title>
+    <title>Listing Details - Real Estate</title>
     <link rel="stylesheet" href="/static/css/style.css" />
     <style>
-      /* ===== CUSTOM DETAIL PAGE STYLES ===== */
       .detail-container {
         max-width: 1200px;
         margin: 30px auto 40px;
         padding: 0 20px;
       }
 
-      /* ---- IMAGES ROW ---- */
       .detail-images-row {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -48,7 +46,6 @@
         transform: scale(1.03);
       }
 
-      /* ---- BOTTOM: TWO EQUAL COLUMNS ---- */
       .detail-bottom-grid {
         display: flex;
         gap: 30px;
@@ -67,13 +64,12 @@
         gap: 20px;
       }
 
-      /* ---- LEFT COLUMN CARDS ---- */
       .detail-description-card {
         background: #ffffff;
         padding: 16px 20px;
         border-radius: 12px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-        max-height: 360px; /* doubled */
+        max-height: 360px;
         display: flex;
         flex-direction: column;
         overflow: hidden;
@@ -155,7 +151,6 @@
         box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
       }
 
-      /* ---- RIGHT COLUMN CARDS ---- */
       .detail-header {
         background: #ffffff;
         padding: 16px 20px;
@@ -198,7 +193,7 @@
         padding: 16px 20px;
         border-radius: 12px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-        flex: 1; /* let it fill remaining space */
+        flex: 1;
       }
       .meta-item {
         display: flex;
@@ -235,7 +230,6 @@
         color: #991b1b;
       }
 
-      /* ===== RESPONSIVE ===== */
       @media (max-width: 992px) {
         .detail-bottom-grid {
           flex-direction: column;
@@ -302,7 +296,7 @@
   <body>
     <nav class="navbar">
       <div class="container nav-container">
-        <a href="/" class="brand">🏠seyed RealEstate</a>
+        <a href="/" class="brand">🏠Seyed Real Estate</a>
         <button
           class="nav-toggle"
           id="navToggle"
@@ -332,7 +326,6 @@
 
     <script src="/static/js/app.js"></script>
     <script>
-      // ---- Nav toggle ----
       const toggle = document.getElementById("navToggle");
       const links = document.getElementById("navLinks");
       if (toggle && links) {
@@ -349,7 +342,6 @@
         });
       }
 
-      // ---- Auth ----
       function updateAuthUI() {
         fetch("/api/user")
           .then((r) => r.json())
@@ -377,18 +369,15 @@
           .catch(() => {});
       }
 
-      // ---- Get listing ID ----
       const pathParts = window.location.pathname.split("/");
       const listingId = pathParts[pathParts.length - 1];
 
-      // ---- Logout ----
       async function handleLogout(e) {
         e.preventDefault();
         await apiFetch("/api/logout", { method: "POST" });
         window.location.href = "/";
       }
 
-      // ---- Render ----
       window.onload = async function () {
         updateAuthUI();
         document
@@ -407,7 +396,6 @@
       function renderListing(listing) {
         const container = document.getElementById("listing-detail");
 
-        // ---- Images ----
         let imagesHtml = "";
         if (listing.images && listing.images.length > 0) {
           imagesHtml = listing.images
@@ -424,7 +412,6 @@
             '<div class="detail-image-wrapper no-image">No images available</div>';
         }
 
-        // ---- Seller info ----
         const sellerPhone = listing.seller.phone || listing.contact_phone || "";
         const sellerSocial = listing.contact_social || "";
         const createdAt = new Date(listing.created_at).toLocaleDateString(
@@ -436,24 +423,23 @@
           },
         );
 
-        // ---- Build HTML ----
         container.innerHTML = `
-                <!-- TOP: Full-width images -->
+                
                 <div class="detail-images-row">
                     ${imagesHtml}
                 </div>
 
-                <!-- BOTTOM: Two equal columns -->
+                
                 <div class="detail-bottom-grid">
-                    <!-- LEFT COLUMN -->
+                    
                     <div class="detail-left-col">
-                        <!-- Description card (doubled height) -->
+                        
                         <div class="detail-description-card">
                             <h3>📄 Description</h3>
                             <p class="detail-description">${listing.description}</p>
                         </div>
 
-                        <!-- Seller Information -->
+                        
                         <div class="detail-seller-card">
                             <h3>👤 Seller Information</h3>
                             <div class="seller-info">
@@ -466,16 +452,16 @@
                         </div>
                     </div>
 
-                    <!-- RIGHT COLUMN -->
+                    
                     <div class="detail-right-column">
-                        <!-- Header card -->
+                        
                         <div class="detail-header">
                             <h1>${listing.title}</h1>
                             <div class="detail-price">$${listing.price.toLocaleString()}</div>
                             <div class="detail-location">📍 ${listing.location}</div>
                         </div>
 
-                        <!-- Meta grid (now fills remaining height) -->
+                        
                         <div class="detail-meta-grid">
                             <div class="meta-item">
                                 <strong>Property Type</strong>

@@ -22,10 +22,6 @@ import click
 app = Flask(__name__, static_folder="static", static_url_path="/static")
 app.config.from_object(Config)
 
-# NOTE:
-# CSRF protection has been removed for this class-project version.
-# The frontend uses normal fetch() API requests, and CSRF was causing
-# HTML error pages to be returned instead of JSON.
 
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 os.makedirs(os.path.join(app.config["UPLOAD_FOLDER"], "thumbnails"), exist_ok=True)
@@ -62,7 +58,7 @@ def allowed_file(filename):
 
 
 def save_uploaded_files(files, listing_id):
-    """Save multiple files and create Image records."""
+
     uploaded = []
 
     for i, file in enumerate(files):
@@ -81,7 +77,7 @@ def save_uploaded_files(files, listing_id):
 
 
 def safe_float(value, default=None):
-    """Convert to float, return default if conversion fails."""
+
     if value is None or value == "":
         return default
 
@@ -92,7 +88,7 @@ def safe_float(value, default=None):
 
 
 def safe_int(value, default=None):
-    """Convert to int, return default if conversion fails."""
+
     if value is None or value == "":
         return default
 
@@ -101,8 +97,6 @@ def safe_int(value, default=None):
     except (ValueError, TypeError):
         return default
 
-
-# ---- Serve frontend pages ----
 
 @app.route("/")
 def index():
@@ -154,8 +148,6 @@ def listing_detail_page(listing_id):
 def uploaded_file(filename):
     return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
 
-
-# ---- Auth endpoints ----
 
 @app.route("/api/register", methods=["POST"])
 def register():
@@ -236,8 +228,6 @@ def get_user():
         }
     )
 
-
-# ---- Listing endpoints ----
 
 @app.route("/api/listings", methods=["GET"])
 def get_listings():
@@ -369,7 +359,13 @@ def create_listing():
     contact_phone = request.form.get("contact_phone", "").strip()
     contact_social = request.form.get("contact_social", "").strip()
 
-    if not title or not description or price is None or not location or not property_type:
+    if (
+        not title
+        or not description
+        or price is None
+        or not location
+        or not property_type
+    ):
         return jsonify({"error": "Missing required fields"}), 400
 
     if price < 0:
@@ -486,7 +482,6 @@ def update_listing(listing_id):
     if files:
         save_uploaded_files(files, listing.id)
 
-    # After editing, send listing back to admin review.
     listing.status = "pending"
 
     db.session.commit()
@@ -540,8 +535,6 @@ def my_listings():
 
     return jsonify(result)
 
-
-# ---- Admin endpoints ----
 
 @app.route("/api/admin/listings", methods=["GET"])
 @login_required
@@ -603,14 +596,12 @@ def reject_listing(listing_id):
     return jsonify({"message": "Listing rejected"})
 
 
-# ---- CLI command ----
-
 @app.cli.command("create-admin")
 @click.argument("email")
 @click.argument("password")
 @click.option("--name", default="Admin")
 def create_admin_command(email, password, name):
-    """Create an admin user with the given email and password."""
+
     email = email.strip().lower()
 
     user = User.query.filter_by(email=email).first()
@@ -627,8 +618,6 @@ def create_admin_command(email, password, name):
 
     click.echo(f"Admin user {email} created/updated successfully.")
 
-
-# ---- Error handlers ----
 
 @app.errorhandler(404)
 def not_found(e):
@@ -647,4 +636,4 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
 
-    app.run(debug=True)
+    app.run(debug=False)

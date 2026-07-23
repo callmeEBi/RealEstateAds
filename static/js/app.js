@@ -1,10 +1,3 @@
-// Global helper functions
-
-/**
- * Wrapper for fetch with JSON and non-JSON error handling.
- * This prevents errors like:
- * Unexpected token '<', "<!doctype..." is not valid JSON
- */
 async function apiFetch(url, options = {}) {
   const headers =
     options.body && !(options.body instanceof FormData)
@@ -28,22 +21,12 @@ async function apiFetch(url, options = {}) {
 
   return data;
 }
-
-/**
- * Simple HTML escaping helper.
- * Useful when inserting user data into template strings.
- */
 function escapeHTML(value) {
   const div = document.createElement("div");
   div.textContent = value == null ? "" : String(value);
   return div.innerHTML;
 }
 
-/**
- * Compatibility helper.
- * Some of your pages call sanitizeHTML().
- * This version uses DOMPurify if available, otherwise falls back to escaping.
- */
 function sanitizeHTML(value) {
   if (typeof DOMPurify !== "undefined") {
     return DOMPurify.sanitize(value);
@@ -52,9 +35,7 @@ function sanitizeHTML(value) {
   return escapeHTML(value);
 }
 
-/**
- * Common mobile navigation toggle.
- */
+
 function initNavToggle() {
   const toggle = document.getElementById("navToggle");
   const links = document.getElementById("navLinks");
