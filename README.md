@@ -1,181 +1,126 @@
-````markdown
-# RealEstateAds
+# Real‑Estate Listing Platform
 
-RealEstateAds is a Flask-based real estate listing web application. Users can register, log in, create property listings with images, browse approved listings, and contact sellers. Admin users can review, approve, or reject submitted listings.
-
----
+A full‑stack web application where sellers can list properties with photos, and buyers can browse, search, and contact sellers. Admin users review and approve all listings before they go live.
 
 ## Features
-
-- User registration and login
-- Create, edit, and delete personal listings
+- User registration and login (session‑based, Flask‑Login)
+- Create, edit, and delete your own property listings
 - Upload multiple images per listing
-- Browse approved listings
-- Search by location, price range, and property type
-- View listing details and seller contact information
-- Admin approval system for new listings
-- Responsive HTML/CSS/JavaScript frontend
-
----
+- Search and filter listings by location, price range, and property type
+- Contact seller via phone or social media (displayed on detail page)
+- Admin panel to approve or reject pending listings
+- Responsive, pure HTML/CSS/JS frontend
 
 ## Tech Stack
-
-- **Backend:** Flask, SQLAlchemy, SQLite
-- **Authentication:** Flask-Login
-- **Frontend:** HTML, CSS, JavaScript
-- **File Uploads:** Local `uploads/` folder
-
----
+- **Backend**: Flask (Python), SQLAlchemy, SQLite
+- **Frontend**: HTML5, CSS3, Vanilla JavaScript
+- **Authentication**: Flask‑Login with hashed passwords
+- **File Upload**: Flask, stored in `uploads/` folder
 
 ## Project Structure
+```
 
-```text
-RealEstateAds/
-├── static/
+project/
+├── app.py                 # Main Flask application
+├── models.py              # Database models (User, Listing, Image)
+├── config.py              # Configuration
+├── requirements.txt       # Python dependencies
+├── .env.example           # Environment variables template
+├── uploads/               # Uploaded images (created at runtime)
+├── static/                # All frontend assets
+│   ├── index.html         # Homepage – browse listings
+│   ├── login.html
+│   ├── register.html
+│   ├── dashboard.html     # Seller’s listing management
+│   ├── create_listing.html
+│   ├── edit_listing.html
+│   ├── admin.html         # Admin panel
 │   ├── css/
 │   │   └── style.css
-│   ├── js/
-│   │   ├── api.js
-│   │   ├── app.js
-│   │   └── auth.js
-│   ├── admin.html
-│   ├── create_listing.html
-│   ├── dashboard.html
-│   ├── edit_listing.html
-│   ├── index.html
-│   ├── listing_detail.html
-│   ├── login.html
-│   └── register.html
-├── app.py
-├── config.py
-├── models.py
-├── README.md
-└── requirements.txt
-```
-````
+│   └── js/
+│       ├── app.js         # Common helpers (fetch, UI)
+│       ├── auth.js        # Login/register logic
+│       └── api.js         # API calls
+└── instance/              # SQLite database file (created at runtime)
 
----
-
-## Setup
-
-### 1. Create a virtual environment
-
-```bash
-python -m venv venv
 ```
 
-Activate it:
+## Setup & Run
 
-```bash
-venv\Scripts\activate
-```
+1. **Clone or download** this project into a folder.
 
-On macOS/Linux:
+2. **Create a virtual environment** (recommended):
+   ```bash
+   python -m venv venv
+   source venv/bin/activate   # On Windows: venv\Scripts\activate
 
-```bash
-source venv/bin/activate
-```
+3. **Install dependencies**:
 
-### 2. Install dependencies
+   ```
+   pip install -r requirements.txt
+   ```
+4. **Create a `.env` file** from the example:
 
-```bash
-pip install -r requirements.txt
-```
+   ```
+   cp .env.example .env
+   ```
 
-### 3. Run the app
+   (Optionally change the `SECRET_KEY` to a random string.)
 
-```bash
-python app.py
-```
+5. **Initialize the database** (first run only):
 
-Open:
+   ```
+   flask shell
+   >>> from app import db
+   >>> db.create_all()
+   >>> exit()
+   ```
 
-```text
-http://localhost:5000
-```
+   Or simply run the app – it will create the database file if missing.
 
-The database and upload folders are created automatically on first run.
+6. **Run the application**:
 
----
+   ```
+   python app.py
+   ```
 
-## Default Admin
+   The server will start at `http://localhost:5000`.
 
-A default admin account is created automatically if no admin exists.
+7. **Create an admin user** (optional – you can promote a user via the shell):
 
-```text
-Email: admin@example.com
-Password: admin123
-```
+   ```
+   flask shell
+   >>> from models import User, db
+   >>> user = User.query.filter_by(email='admin@example.com').first()
+   >>> user.role = 'admin'
+   >>> db.session.commit()
+   >>> exit()
+   ```
+8. Open your browser and go to `http://localhost:5000`.
 
-Admin panel:
+## API Endpoints (for reference)
 
-```text
-http://localhost:5000/admin
-```
+- `POST /api/register` – Register a new user
+- `POST /api/login` – Log in
+- `POST /api/logout` – Log out
+- `GET /api/listings` – Get all approved listings (with search/filter)
+- `POST /api/listings` – Create a new listing (auth required)
+- `GET /api/listings/<id>` – Get a single listing
+- `PUT /api/listings/<id>` – Update a listing (owner only)
+- `DELETE /api/listings/<id>` – Delete a listing (owner or admin)
+- `GET /api/my-listings` – Get listings of the current user
+- `GET /api/admin/listings` – Get all pending listings (admin only)
+- `POST /api/admin/listings/<id>/approve` – Approve a listing
+- `POST /api/admin/listings/<id>/reject` – Reject a listing
+- `GET /api/user` – Get current user info
 
----
+## Deployment Notes
 
-## Main Routes
+- For production, change `SECRET_KEY` to a strong random string.
+- Use a proper database (PostgreSQL) by updating `DATABASE_URL` in `.env`.
+- Serve static files via a web server (Nginx) or use `Whitenoise` for better performance.
 
-| Route           | Description                  |
-| --------------- | ---------------------------- |
-| `/`             | Home page and listing search |
-| `/login`        | Login page                   |
-| `/register`     | Register page                |
-| `/dashboard`    | User listings dashboard      |
-| `/create`       | Create listing page          |
-| `/edit/<id>`    | Edit listing page            |
-| `/listing/<id>` | Listing detail page          |
-| `/admin`        | Admin approval panel         |
+## License
 
----
-
-## API Endpoints
-
-| Method   | Endpoint                           | Description                 |
-| -------- | ---------------------------------- | --------------------------- |
-| `POST`   | `/api/register`                    | Register user               |
-| `POST`   | `/api/login`                       | Login user                  |
-| `POST`   | `/api/logout`                      | Logout user                 |
-| `GET`    | `/api/user`                        | Get current user            |
-| `GET`    | `/api/listings`                    | Get approved listings       |
-| `POST`   | `/api/listings`                    | Create listing              |
-| `GET`    | `/api/listings/<id>`               | Get listing details         |
-| `PUT`    | `/api/listings/<id>`               | Update listing              |
-| `DELETE` | `/api/listings/<id>`               | Delete listing              |
-| `GET`    | `/api/my-listings`                 | Get current user's listings |
-| `GET`    | `/api/admin/listings`              | Get pending listings        |
-| `POST`   | `/api/admin/listings/<id>/approve` | Approve listing             |
-| `POST`   | `/api/admin/listings/<id>/reject`  | Reject listing              |
-
----
-
-## Listing Approval Flow
-
-1. User creates a listing.
-2. Listing status is set to `pending`.
-3. Admin reviews the listing.
-4. Admin approves or rejects it.
-5. Approved listings appear on the home page.
-
----
-
-## Dependencies
-
-```text
-Flask==2.3.3
-Flask-SQLAlchemy==3.1.1
-Flask-Login==0.6.2
-Flask-WTF==1.1.1
-python-dotenv==1.0.0
-Werkzeug==2.3.7
-```
-
----
-
-## Notes
-
-- Uploaded images are stored in `uploads/`.
-- SQLite database is created automatically.
-- This project is intended for educational/class project use.
+MIT (or as required by your institution)
 
