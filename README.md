@@ -182,7 +182,7 @@ Full step-by-step walkthrough (request → validation → DB → response) is in
 
 This README covers running the app. For the full project write-up:
 
-- **[DOCUMENTATION.md](./DOCUMENTATION.md)** — requirements analysis, UML
+- **Official DOCUMENTATION** — requirements analysis, UML
   diagrams (use case, class, sequence), architecture, full API reference,
   and verified test results
 - **[DATABASE-DESIGN.md](./DATABASE-DESIGN.md)** — entity breakdown and ER
