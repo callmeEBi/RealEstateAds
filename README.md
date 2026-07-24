@@ -165,7 +165,7 @@ Admin panel: **http://localhost:5000/admin**
 | `POST` | `/api/admin/listings/<id>/reject` | Reject listing |
 
 Full detail, including auth requirements per endpoint, is in
-[DOCUMENTATION.md](./DOCUMENTATION.md#6-api-documentation).
+`DOCUMENTATION`.
 
 ## How Approval Works
 
@@ -174,9 +174,6 @@ Full detail, including auth requirements per endpoint, is in
 3. Admin reviews it.
 4. Admin approves or rejects it.
 5. Approved listings appear on the home page.
-
-Full step-by-step walkthrough (request → validation → DB → response) is in
-[DOCUMENTATION.md](./DOCUMENTATION.md#43-sequence-diagram--create-listing).
 
 ## Documentation
 
