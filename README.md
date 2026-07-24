@@ -182,7 +182,7 @@ Full step-by-step walkthrough (request → validation → DB → response) is in
 
 This README covers running the app. For the full project write-up:
 
-- **Official DOCUMENTATION** — requirements analysis, UML
+- **`DOCUMENTATION`** — requirements analysis, UML
   diagrams (use case, class, sequence), architecture, full API reference,
   and verified test results
 - **[DATABASE-DESIGN.md](./DATABASE-DESIGN.md)** — entity breakdown and ER
@@ -200,5 +200,5 @@ Exact pinned versions: see [requirements.txt](./requirements.txt).
 - Uploaded images are stored in `uploads/`; the SQLite database is created
   automatically.
 - Local file storage works for development but won't survive most free
-  hosting platforms as-is — see `DOCUMENTATION.md` for the deployment plan.
+  hosting platforms as-is — see `DOCUMENTATION` for the deployment notes.
 - This project is intended for educational/class project use.
